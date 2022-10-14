@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
-contract Gold721 is ERC721URIStorage,Ownable {
+contract Erc721 is ERC721URIStorage,Ownable {
      string private __name;
     string private __symbol;
     using Counters for Counters.Counter;
