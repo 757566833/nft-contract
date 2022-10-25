@@ -50,16 +50,15 @@ contract Erc721 is ERC721URIStorage, Ownable {
         tokenList[tokenId] = price;
     }
 
-    function cancelSell(uint256 tokenId, uint256 price) public {
+    function cancelSell(uint256 tokenId) public {
         require(
             ownerOf(tokenId) == msg.sender,
             "Permission denied:nft it's not yours"
         );
-        tokenList[tokenId] = price;
         delete tokenList[tokenId];
     }
     function buy (uint256 tokenId) payable public {
-        require(tokenList[tokenId]!=0,"item not selling");
+        require(tokenList[tokenId]!=0,"Item not selling");
         require(msg.value==tokenList[tokenId],"Incorrect price");
         safeTransferFrom(ownerOf(tokenId), msg.sender, tokenId);
     }
