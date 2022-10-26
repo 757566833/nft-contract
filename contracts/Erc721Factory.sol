@@ -6,7 +6,6 @@ import "./Erc721.sol";
 import "./interfaces/IErc721.sol";
 
 contract Erc721Factory {
-    address[] public allErc721;
     using Counters for Counters.Counter;
     Counters.Counter private _count;
     event Created(address indexed sender,address indexed erc721);
@@ -25,7 +24,6 @@ contract Erc721Factory {
         }
         IErc721(erc721).initialize(name, symbol);
         IErc721(erc721).transferOwnership(msg.sender);
-        allErc721.push(erc721);
         emit Created(msg.sender,erc721);
     }
 }
