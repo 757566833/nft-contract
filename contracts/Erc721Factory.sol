@@ -8,7 +8,7 @@ import "./interfaces/IErc721.sol";
 contract Erc721Factory {
     using Counters for Counters.Counter;
     Counters.Counter private _count;
-    event Created(address indexed sender,address indexed erc721);
+    event Created(address indexed erc721);
 
     function createErc721(string memory name, string memory symbol)
         external
@@ -24,6 +24,6 @@ contract Erc721Factory {
         }
         IErc721(erc721).initialize(name, symbol);
         IErc721(erc721).transferOwnership(msg.sender);
-        emit Created(msg.sender,erc721);
+        emit Created(erc721);
     }
 }

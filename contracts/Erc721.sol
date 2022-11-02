@@ -18,10 +18,11 @@ contract Erc721 is ERC721URIStorage, Ownable {
     mapping(uint256 => uint256) tokenList;
     mapping(address => uint256) value;
 
-    event Sell(uint256 tokenId, uint256 price);
-    event CancelSell(uint256 tokenId);
-    event Buy(uint256 tokenId);
-    event WithDraw(uint256 value);
+    event Sell(uint256 indexed tokenId, uint256 indexed price);
+    // 主动下架是1 被购买下架是2
+    event CancelSell(uint256 indexed tokenId, uint8 indexed status);
+    event Buy();
+    event WithDraw(uint256 indexed value);
 
     function mint(address account, string memory tokenURI)
         public
@@ -53,8 +54,9 @@ contract Erc721 is ERC721URIStorage, Ownable {
             ownerOf(tokenId) == msg.sender,
             "Permission denied:nft it's not yours"
         );
+        require(price > 0, "price must more than the 0");
         tokenList[tokenId] = price;
-       emit Sell(tokenId,price);
+        emit Sell(tokenId, price);
     }
 
     function cancelSell(uint256 tokenId) public {
@@ -63,7 +65,7 @@ contract Erc721 is ERC721URIStorage, Ownable {
             "Permission denied:nft it's not yours"
         );
         delete tokenList[tokenId];
-        emit CancelSell(tokenId);
+        emit CancelSell(tokenId, 1);
     }
 
     function buy(uint256 tokenId) public payable {
@@ -71,7 +73,8 @@ contract Erc721 is ERC721URIStorage, Ownable {
         require(msg.value == tokenList[tokenId], "Incorrect price");
         value[ownerOf(tokenId)] = msg.value;
         safeTransferFrom(ownerOf(tokenId), msg.sender, tokenId);
-        emit CancelSell(tokenId);
+        emit Buy();
+        emit CancelSell(tokenId, 2);
     }
 
     function withDraw(uint256 _value) public {
@@ -80,5 +83,42 @@ contract Erc721 is ERC721URIStorage, Ownable {
         sender.transfer(_value);
         value[msg.sender] = value[msg.sender] - _value;
         emit WithDraw(_value);
+    }
+
+    /**
+     * @dev See {IERC721-transferFrom}.
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        require(tokenList[tokenId] == 0, "Item is selling");
+        super.transferFrom(from, to, tokenId);
+    }
+
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        require(tokenList[tokenId] == 0, "Item is selling");
+        super.safeTransferFrom(from, to, tokenId);
+    }
+
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) public virtual override {
+        require(tokenList[tokenId] == 0, "Item is selling");
+        super.safeTransferFrom(from, to, tokenId, data);
     }
 }
