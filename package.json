@@ -13,6 +13,7 @@
     "@types/mocha": "9.1.1",
     "@types/node": "18.8.5",
     "chai": "4.3.6",
+    "dotenv": "16.0.3",
     "ethers": "5.7.1",
     "hardhat": "2.11.2",
     "hardhat-gas-reporter": "1.0.9",
@@ -26,9 +27,9 @@
     "@openzeppelin/contracts": "4.7.3"
   },
   "scripts": {
-    "start":"http-server -p 7001 artifacts/contracts --cors='*'",
-    "compile":"hardhat compile",
-    "push:local":"hardhat run scripts/deploy.ts --network local",
-    "chain":"hardhat node --hostname 0.0.0.0"
+    "start": "http-server -p 7001 artifacts/contracts --cors='*'",
+    "compile": "hardhat compile",
+    "push:local": "hardhat run scripts/deploy.ts --network local",
+    "chain": "hardhat node --hostname 0.0.0.0"
   }
 }
