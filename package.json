@@ -30,6 +30,7 @@
     "start": "http-server -p 7001 artifacts/contracts --cors='*'",
     "compile": "hardhat compile",
     "push:local": "hardhat run scripts/deploy.ts --network local",
+    "push:edges": "hardhat run scripts/deploy.ts --network edges",
     "chain": "hardhat node --hostname 0.0.0.0"
   }
 }
