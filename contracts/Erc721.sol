@@ -92,6 +92,10 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
         emit CancelSell(tokenId, 2);
     }
 
+    function valueOf (address _user) external  view returns (uint256){
+        return value[_user];
+    }
+
     function withDraw(uint256 _value) public {
         require(_value <= value[msg.sender], "Insufficient balance");
         address payable sender = payable(msg.sender);
