@@ -12,18 +12,20 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
     string private __name;
     string private __symbol;
     string private __version;
+    address[] private __creatorAddress;
+    uint8[] private __creatorRate;
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
     constructor() ERC721("ERC721", "E721") {}
 
     mapping(uint256 => uint256) tokenList;
-    mapping(address => uint256) value;
+
+    event Creator(address indexed account, uint8 indexed rate);
 
     event Sell(uint256 indexed tokenId, uint256 indexed price);
     // 主动下架是1 被购买下架是2
     event CancelSell(uint256 indexed tokenId, uint8 indexed status);
-    event WithDraw(uint256 indexed value);
 
     function transferContractOwnership(address newOwner) external onlyOwner {
         super.transferOwnership(newOwner);
@@ -56,10 +58,15 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
     function initialize(
         string memory _name,
         string memory _symbol,
+        address[] memory _creatorAddress,
+        uint8[] memory _creatorRate,
         string memory _verison
     ) public {
+        require(_creatorAddress.length == _creatorRate.length,"creator address length not equal to creator reate length");
         __name = _name;
         __symbol = _symbol;
+        __creatorAddress= _creatorAddress;
+        __creatorRate=_creatorRate;
         __version = _verison;
     }
 
@@ -86,22 +93,19 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
     function buy(uint256 tokenId, address to) public payable {
         require(tokenList[tokenId] != 0, "Item not selling");
         require(msg.value == tokenList[tokenId], "Incorrect price");
-        value[ownerOf(tokenId)] = msg.value;
+        emit CancelSell(tokenId, 2);
+        address payable from = payable(ownerOf(tokenId));
         delete tokenList[tokenId];
         safeTransferFrom(ownerOf(tokenId), to, tokenId);
-        emit CancelSell(tokenId, 2);
-    }
-
-    function valueOf (address _user) external  view returns (uint256){
-        return value[_user];
-    }
-
-    function withDraw(uint256 _value) public {
-        require(_value <= value[msg.sender], "Insufficient balance");
-        address payable sender = payable(msg.sender);
-        sender.transfer(_value);
-        value[msg.sender] = value[msg.sender] - _value;
-        emit WithDraw(_value);
+        uint256 _value = msg.value;
+        for (uint256 index = 0; index < __creatorAddress.length; index++) {
+            address payable user = payable(__creatorAddress[index]);
+            uint256 currentValue = __creatorRate[index]*msg.value/100;
+            user.transfer(currentValue);
+            _value = _value-currentValue;
+            emit Creator(user,__creatorRate[index]);
+        }
+        from.transfer(_value);
     }
 
     /**

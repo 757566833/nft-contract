@@ -15,6 +15,12 @@ const config: HardhatUserConfig = {
       accounts:['0xfab54cdd36268dc0e8e8d9647aed14d9e0985d16f137460a4097a0fc11429eb1'],
       gas:'auto',
       gasPrice:'auto'
+    },
+    fzcode:{
+      url:"https://rpc.fzcode.com",
+      accounts:['0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'],
+      gas:'auto',
+      gasPrice:'auto'
     }
   }
 };
