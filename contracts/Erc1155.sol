@@ -14,14 +14,12 @@ contract Erc1155 is ERC1155URIStorage, Ownable {
     Counters.Counter private _count;
 
     mapping(uint256 => string) private _names;
-    mapping(uint256 => uint256) private _maxs;
     mapping(uint256 => address) private _owners;
     mapping(uint256 => uint256) private _totals;
 
     event Created(address indexed op, uint256 indexed num, uint256 indexed max);
     event Info(
         string indexed name,
-        string indexed collectionId,
         string indexed tokenURI
     );
 
@@ -31,7 +29,6 @@ contract Erc1155 is ERC1155URIStorage, Ownable {
 
     function create(
         string memory name,
-        string memory collectionId,
         uint256 max,
         string memory tokenURI
     ) public {
@@ -39,10 +36,9 @@ contract Erc1155 is ERC1155URIStorage, Ownable {
         uint256 index = _count.current();
         _setURI(index, tokenURI);
         _names[index] = name;
-        _maxs[index] = max;
         _owners[index] = msg.sender;
         emit Created(msg.sender, index, max);
-        emit Info(name, collectionId, tokenURI);
+        emit Info(name, tokenURI);
     }
 
     function mint(
@@ -51,8 +47,8 @@ contract Erc1155 is ERC1155URIStorage, Ownable {
         uint256 amount
     ) public {
         require(msg.sender == _owners[id]);
-        require(_totals[id]+amount<=_maxs[id]);
         _mint(account, id, amount, "");
+        _totals[id]=_totals[id]+amount;
     }
 
     function version() public view returns (string memory) {
