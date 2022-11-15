@@ -24,9 +24,15 @@ contract Robot {
     function buy(
         address c,
         address to,
-        uint256 tokenId
+        uint256 tokenId,
+                address[] memory _creatorAddress,
+        uint8[] memory _creatorRate
     ) external payable {
+         require(
+            _creatorAddress.length == _creatorRate.length,
+            "creator address length not equal to creator reate length"
+        );
         emit Buy(c, tokenId, msg.value);
-        IErc721(c).buy{value: msg.value}(tokenId, to);
+        IErc721(c).buy{value: msg.value}(tokenId, to,_creatorAddress,_creatorRate);
     }
 }

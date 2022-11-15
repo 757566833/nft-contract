@@ -12,8 +12,6 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
     string private __name;
     string private __symbol;
     string private __version;
-    address[] private __creatorAddress;
-    uint8[] private __creatorRate;
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
@@ -58,15 +56,11 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
     function initialize(
         string memory _name,
         string memory _symbol,
-        address[] memory _creatorAddress,
-        uint8[] memory _creatorRate,
         string memory _verison
     ) public {
-        require(_creatorAddress.length == _creatorRate.length,"creator address length not equal to creator reate length");
+       
         __name = _name;
         __symbol = _symbol;
-        __creatorAddress= _creatorAddress;
-        __creatorRate=_creatorRate;
         __version = _verison;
     }
 
@@ -90,7 +84,16 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
         emit CancelSell(tokenId, 1);
     }
 
-    function buy(uint256 tokenId, address to) public payable {
+    function buy(
+        uint256 tokenId,
+        address to,
+        address[] memory _creatorAddress,
+        uint8[] memory _creatorRate
+    ) public payable {
+         require(
+            _creatorAddress.length == _creatorRate.length,
+            "creator address length not equal to creator reate length"
+        );
         require(tokenList[tokenId] != 0, "Item not selling");
         require(msg.value == tokenList[tokenId], "Incorrect price");
         emit CancelSell(tokenId, 2);
@@ -98,12 +101,12 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
         delete tokenList[tokenId];
         safeTransferFrom(ownerOf(tokenId), to, tokenId);
         uint256 _value = msg.value;
-        for (uint256 index = 0; index < __creatorAddress.length; index++) {
-            address payable user = payable(__creatorAddress[index]);
-            uint256 currentValue = __creatorRate[index]*msg.value/100;
+        for (uint256 index = 0; index < _creatorAddress.length; index++) {
+            address payable user = payable(_creatorAddress[index]);
+            uint256 currentValue = (_creatorRate[index] * msg.value) / 100;
             user.transfer(currentValue);
-            _value = _value-currentValue;
-            emit Creator(user,__creatorRate[index]);
+            _value = _value - currentValue;
+            emit Creator(user, _creatorRate[index]);
         }
         from.transfer(_value);
     }

@@ -20,10 +20,10 @@ contract Erc721Factory {
         return __version;
     }
 
-    function createErc721(string memory name, string memory symbol)
-        external
-        returns (address erc721)
-    {
+    function createErc721(
+        string memory _name,
+        string memory _symbol
+    ) external returns (address erc721) {
         bytes memory bytecode = type(Erc721).creationCode;
         _count.increment();
         bytes32 salt = keccak256(
@@ -32,7 +32,7 @@ contract Erc721Factory {
         assembly {
             erc721 := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        IErc721(erc721).initialize(name, symbol, __version);
+        IErc721(erc721).initialize(_name, _symbol, __version);
         IErc721(erc721).transferContractOwnership(msg.sender);
         emit Created(erc721);
     }

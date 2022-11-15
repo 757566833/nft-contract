@@ -15,8 +15,6 @@ interface IErc721 {
     function initialize(
         string memory _name,
         string memory _symbol,
-        address[] memory _creatorAddress,
-        uint8[] memory _creatorRate,
         string memory _verison
     ) external;
 
@@ -24,5 +22,10 @@ interface IErc721 {
 
     function cancelSell(uint256 tokenId) external;
 
-    function buy(uint256 tokenId, address to) external payable;
+    function buy(
+        uint256 tokenId,
+        address to,
+        address[] memory _creatorAddress,
+        uint8[] memory _creatorRate
+    ) external payable;
 }

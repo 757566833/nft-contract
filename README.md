@@ -1,13 +1,64 @@
-# Sample Hardhat Project
+# 版本记录
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+## 1.1.0
 
-Try running some of the following tasks:
+### 合同部分
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+#### 合约新增功能
+
+- erc721        购买分红
+- erc1155        铸造
+- erc1155        交易
+- erc1155        创造
+
+#### 合约功能修改
+
+- erc721       不再需要余额提取，购买时直接转账，成本转嫁买家
+
+### nft生成器
+
+#### 生成器功能新增
+
+- ipfs支持命名空间（节约gas？待测）
+
+----------------------------------
+
+## 1.0.0
+
+### 合同部分
+
+#### 合约新增功能
+
+- erc721        铸造
+- erc721        上架
+- erc721        下架
+- erc721        购买
+- erc721        普通交易
+- erc721factory 部署721
+- robot         机器人交易（挂单交易）
+
+### nft生成器
+
+#### 生成器新增功能
+
+- minio文件系统
+- ipfs文件系统
+- nft生成
+- 图片在线剪裁
+- 图片批量上传
+- erc721动态部署
+- 随机生成nft并支持修改
+- nft批量下载
+- nft自动化铸造
+
+### nft市场
+
+#### 市场新增功能
+
+- nft上架
+- nft下架
+- nft购买
+- nft详情
+- nft市场交易记录
+- nft链上交易记录
+- 余额查询与提现
