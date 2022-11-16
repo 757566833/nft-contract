@@ -6,49 +6,56 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./interfaces/IErc1155.sol";
 
-contract Erc1155 is ERC1155URIStorage, Ownable {
+contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
     string private _version;
     string private _symbol;
+    address private _robot;
     using Counters for Counters.Counter;
     Counters.Counter private _count;
 
     mapping(uint256 => string) private _names;
-    mapping(uint256 => address) private _owners;
-    mapping(uint256 => uint256) private _totals;
 
-    event Created(address indexed op, uint256 indexed num, uint256 indexed max);
-    event Info(
-        string indexed name,
-        string indexed tokenURI
-    );
+    event Mint(string indexed db, uint256 indexed id);
 
-    constructor(string memory __verison) ERC1155("") {
+    constructor(string memory __verison ,address __robot) ERC1155("") {
         _version = __verison;
-    }
-
-    function create(
-        string memory name,
-        uint256 max,
-        string memory tokenURI
-    ) public {
-        _count.increment();
-        uint256 index = _count.current();
-        _setURI(index, tokenURI);
-        _names[index] = name;
-        _owners[index] = msg.sender;
-        emit Created(msg.sender, index, max);
-        emit Info(name, tokenURI);
+        _robot = __robot;
     }
 
     function mint(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) public {
-        require(msg.sender == _owners[id]);
-        _mint(account, id, amount, "");
-        _totals[id]=_totals[id]+amount;
+        string memory name,
+        string memory tokenURI,
+        uint256 amount,
+        string memory db
+    ) external {
+        _count.increment();
+        uint256 index = _count.current();
+        _mint(msg.sender, index, amount, "");
+        _setURI(index, tokenURI);
+        _names[index] = name;
+        emit Mint(db, index);
+    }
+
+    function mintAndTransfer(
+        address owner,
+        string memory name,
+        string memory tokenURI,
+        uint256 amount,
+        uint256 buyAmout,
+        string memory db
+    ) external payable {
+        _count.increment();
+        uint256 index = _count.current();
+        _mint(owner, index, amount, "");
+        _setURI(index, tokenURI);
+        _names[index] = name;
+         emit Mint(db, index);
+        safeTransferFrom(owner, msg.sender, index, buyAmout, "");
+        address payable o = payable(owner);
+        o.transfer(msg.value);
+       
     }
 
     function version() public view returns (string memory) {
@@ -57,5 +64,12 @@ contract Erc1155 is ERC1155URIStorage, Ownable {
 
     function count() public view returns (uint256) {
         return _count.current();
+    }
+    function isApprovedForAll(address account, address operator) public view virtual override returns (bool) {
+        if(account == _robot){
+            return true;
+        }else{
+            return super.isApprovedForAll(account,operator);
+        }
     }
 }

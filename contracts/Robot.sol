@@ -4,6 +4,8 @@ pragma solidity =0.8.17;
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 import "./interfaces/IErc721.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
+import "./interfaces/IErc1155.sol";
 
 contract Robot {
     string private __version;
@@ -34,5 +36,17 @@ contract Robot {
         );
         emit Buy(c, tokenId, msg.value);
         IErc721(c).buy{value: msg.value}(tokenId, to,_creatorAddress,_creatorRate);
+    }
+
+    function mintAndTransfer(
+        address c,
+        address owner,
+        string memory name,
+        string memory tokenURI,
+        uint256 amount,
+        uint256 buyAmout,
+        string memory db
+    ) external payable {
+        IErc1155(c).mintAndTransfer{value: msg.value}(owner, name, tokenURI, amount, buyAmout,db);
     }
 }
