@@ -12,64 +12,94 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
     string private _version;
     string private _symbol;
     address private _robot;
-    using Counters for Counters.Counter;
-    Counters.Counter private _count;
 
     mapping(uint256 => string) private _names;
 
-    event Mint(string indexed db, uint256 indexed id);
+    event Mint(uint256 indexed id, uint256 indexed amount);
 
-    constructor(string memory __verison ,address __robot) ERC1155("") {
+    constructor(string memory __verison, address __robot) ERC1155("") {
         _version = __verison;
         _robot = __robot;
     }
 
     function mint(
+        uint256 tokenId,
         string memory name,
         string memory tokenURI,
-        uint256 amount,
-        string memory db
+        uint256 amount
     ) external {
-        _count.increment();
-        uint256 index = _count.current();
-        _mint(msg.sender, index, amount, "");
-        _setURI(index, tokenURI);
-        _names[index] = name;
-        emit Mint(db, index);
+        require(keccak256(abi.encodePacked(uri(tokenId))) == keccak256(""));
+        _mint(msg.sender, tokenId, amount, "");
+        _setURI(tokenId, tokenURI);
+        _names[tokenId] = name;
+        emit Mint(tokenId, amount);
     }
 
-    function mintAndTransfer(
-        address owner,
+    function mintAndBuy(
+        uint256 tokenId,
+        address from,
+        address to,
         string memory name,
         string memory tokenURI,
-        uint256 amount,
-        uint256 buyAmout,
-        string memory db
+        uint256 amount
     ) external payable {
-        _count.increment();
-        uint256 index = _count.current();
-        _mint(owner, index, amount, "");
-        _setURI(index, tokenURI);
-        _names[index] = name;
-         emit Mint(db, index);
-        safeTransferFrom(owner, msg.sender, index, buyAmout, "");
-        address payable o = payable(owner);
+        require(keccak256(abi.encodePacked(uri(tokenId))) == keccak256(""));
+        _mint(from, tokenId, amount, "");
+        _setURI(tokenId, tokenURI);
+        _names[tokenId] = name;
+        emit Mint(tokenId, amount);
+        safeTransferFrom(from, to, tokenId, amount, "");
+        address payable o = payable(from);
         o.transfer(msg.value);
-       
+    }
+
+    function batchBuy(
+        address[] memory from,
+        address[] memory to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+         string[] memory tokenURI,
+         string[] memory name,
+         bool[] memory isMint
+    ) external payable {
+        require((from.length==to.length)&&(to.length==ids.length)&&(ids.length==amounts.length)&&(amounts.length==tokenURI.length)&&(tokenURI.length==name.length));
+        uint256[] storage unMint;
+        for (uint256 index = 0; index < ids.length; index++) {
+            if(keccak256(abi.encodePacked(uri(ids[index]))) == keccak256("")){
+                // todo
+                // unMint.push(ids[index]);
+            }
+        }
+    }
+
+    function buy(
+        uint256 tokenId,
+        address from,
+        address to,
+        uint256 amount
+    ) external payable {
+        require(keccak256(abi.encodePacked(uri(tokenId))) != keccak256(""));
+        require(balanceOf(from, tokenId) >= amount);
+        safeTransferFrom(from, to, tokenId, amount, "");
+        address payable o = payable(from);
+        o.transfer(msg.value);
     }
 
     function version() public view returns (string memory) {
         return _version;
     }
 
-    function count() public view returns (uint256) {
-        return _count.current();
-    }
-    function isApprovedForAll(address account, address operator) public view virtual override returns (bool) {
-        if(account == _robot){
+    function isApprovedForAll(address account, address operator)
+        public
+        view
+        virtual
+        override
+        returns (bool)
+    {
+        if (account == _robot) {
             return true;
-        }else{
-            return super.isApprovedForAll(account,operator);
+        } else {
+            return super.isApprovedForAll(account, operator);
         }
     }
 }

@@ -7,27 +7,27 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IErc1155 {
     function mint(
+        uint256 tokenId,
         string memory name,
         string memory tokenURI,
-        uint256 amount,
-        string memory db
+        uint256 amount
     ) external;
 
-    function mintAndTransfer(
-        address owner,
+    function mintAndBuy(
+        uint256 tokenId,
+        address from,
+        address to,
         string memory name,
         string memory tokenURI,
-        uint256 amount,
-        uint256 buyAmout,
-        string memory db
+        uint256 amount
+    ) external payable;
+    
+    function buy(
+        uint256 tokenId,
+        address from,
+        address to,
+        uint256 amount
     ) external payable;
 
     function version() external view returns (string memory);
-
-    function count() external view returns (uint256);
-
-    // function isApprovedForAll(address account, address operator)
-    //     external
-    //     view
-    //     returns (bool);
 }

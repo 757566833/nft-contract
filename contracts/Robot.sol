@@ -23,30 +23,58 @@ contract Robot {
         return __version;
     }
 
-    function buy(
+    function buy721(
         address c,
         address to,
         uint256 tokenId,
-                address[] memory _creatorAddress,
+        address[] memory _creatorAddress,
         uint8[] memory _creatorRate
     ) external payable {
-         require(
+        require(
             _creatorAddress.length == _creatorRate.length,
             "creator address length not equal to creator reate length"
         );
         emit Buy(c, tokenId, msg.value);
-        IErc721(c).buy{value: msg.value}(tokenId, to,_creatorAddress,_creatorRate);
+        IErc721(c).buy{value: msg.value}(
+            tokenId,
+            to,
+            _creatorAddress,
+            _creatorRate
+        );
     }
 
-    function mintAndTransfer(
+function buy1155(
         address c,
-        address owner,
+       uint256 tokenId,
+        address from,
+        address to,
+        uint256 amount
+    ) external payable {
+        IErc1155(c).buy{value: msg.value}(
+            tokenId,
+            from,
+            to,
+            amount
+        );
+    }
+
+    function mintAndBuy1155(
+        address c,
+        uint256 tokenId,
+        address from,
+        address to,
         string memory name,
         string memory tokenURI,
-        uint256 amount,
-        uint256 buyAmout,
-        string memory db
+        uint256 amount
     ) external payable {
-        IErc1155(c).mintAndTransfer{value: msg.value}(owner, name, tokenURI, amount, buyAmout,db);
+        IErc1155(c).mintAndBuy{value: msg.value}(
+            tokenId,
+            from,
+            to,
+            name,
+            tokenURI,
+            amount
+        );
     }
+
 }
