@@ -23,13 +23,14 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
     }
 
     function mint(
+        address to,
         uint256 tokenId,
         string memory name,
         string memory tokenURI,
         uint256 amount
     ) external {
         require(keccak256(abi.encodePacked(uri(tokenId))) == keccak256(""));
-        _mint(msg.sender, tokenId, amount, "");
+        _mint(to, tokenId, amount, "");
         _setURI(tokenId, tokenURI);
         _names[tokenId] = name;
         emit Mint(tokenId, amount);
@@ -54,21 +55,45 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
     }
 
     function batchBuy(
-        address[] memory from,
-        address[] memory to,
+        address[] memory froms,
+        address[] memory tos,
         uint256[] memory ids,
         uint256[] memory amounts,
-         string[] memory tokenURI,
-         string[] memory name,
-         bool[] memory isMint
+        string[] memory tokenURIs,
+        string[] memory names,
+        uint256[] memory values
     ) external payable {
-        require((from.length==to.length)&&(to.length==ids.length)&&(ids.length==amounts.length)&&(amounts.length==tokenURI.length)&&(tokenURI.length==name.length));
-        uint256[] storage unMint;
-        for (uint256 index = 0; index < ids.length; index++) {
-            if(keccak256(abi.encodePacked(uri(ids[index]))) == keccak256("")){
-                // todo
-                // unMint.push(ids[index]);
+        require(
+            (froms.length == tos.length) &&
+                (tos.length == ids.length) &&
+                (ids.length == amounts.length) &&
+                (amounts.length == tokenURIs.length) &&
+                (tokenURIs.length == names.length) &&
+                (names.length == values.length)
+        );
+        uint256 total = 0;
+        for (uint256 index = 0; index < values.length; index++) {
+            total += values[index];
+        }
+        require(msg.value >= total);
+        for (uint256 index = 0; index < froms.length; index++) {
+            address from = froms[index];
+            address to = tos[index];
+            uint256 id = ids[index];
+            uint256 amount = amounts[index];
+            string memory tokenURI = tokenURIs[index];
+            string memory name = names[index];
+            if (keccak256(abi.encodePacked(uri(id))) == keccak256("")) {
+                _mint(from, id, amount, "");
+                _setURI(id, tokenURI);
+                _names[id] = name;
+                emit Mint(id, amount);
+            } else if (balanceOf(from, id) < amount) {
+                uint256 b = balanceOf(from, id);
+                _mint(from, id, amount - b, "");
+                emit Mint(id, amount - b);
             }
+            safeTransferFrom(from, to, id, amount, "");
         }
     }
 

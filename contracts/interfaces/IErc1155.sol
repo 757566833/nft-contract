@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IErc1155 {
     function mint(
+        address to,
         uint256 tokenId,
         string memory name,
         string memory tokenURI,
@@ -20,6 +21,15 @@ interface IErc1155 {
         string memory name,
         string memory tokenURI,
         uint256 amount
+    ) external payable;
+     function batchBuy(
+        address[] memory froms,
+        address[] memory tos,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        string[] memory tokenURIs,
+        string[] memory names,
+        uint256[] memory values
     ) external payable;
     
     function buy(

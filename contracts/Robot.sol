@@ -43,19 +43,38 @@ contract Robot {
         );
     }
 
-function buy1155(
+    function mint1155(
         address c,
-       uint256 tokenId,
+        address to,
+        uint256 tokenId,
+        string memory name,
+        string memory tokenURI,
+        uint256 amount
+    ) external payable {
+        IErc1155(c).mint(to, tokenId, name, tokenURI, amount);
+    }
+
+    function buy1155(
+        address c,
+        uint256 tokenId,
         address from,
         address to,
         uint256 amount
     ) external payable {
-        IErc1155(c).buy{value: msg.value}(
-            tokenId,
-            from,
-            to,
-            amount
-        );
+        IErc1155(c).buy{value: msg.value}(tokenId, from, to, amount);
+    }
+
+    function batchBuy1155(
+        address c,
+        address[] memory froms,
+        address[] memory tos,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        string[] memory tokenURIs,
+        string[] memory names,
+        uint256[] memory values
+    ) external payable {
+        IErc1155(c).batchBuy{value: msg.value}(froms, tos, ids, amounts, tokenURIs, names, values);
     }
 
     function mintAndBuy1155(
@@ -76,5 +95,4 @@ function buy1155(
             amount
         );
     }
-
 }
