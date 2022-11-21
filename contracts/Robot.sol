@@ -56,16 +56,20 @@ contract Robot {
 
     function buy1155(
         address c,
+        string memory orderId,
+        string memory orderHash,
         uint256 tokenId,
         address from,
         address to,
         uint256 amount
     ) external payable {
-        IErc1155(c).buy{value: msg.value}(tokenId, from, to, amount);
+        IErc1155(c).buy{value: msg.value}(orderId,orderHash,tokenId, from, to, amount);
     }
 
     function batchBuy1155(
         address c,
+         string[] memory orderIds,
+        string[] memory orderHashs,
         address[] memory froms,
         address[] memory tos,
         uint256[] memory ids,
@@ -74,11 +78,13 @@ contract Robot {
         string[] memory names,
         uint256[] memory values
     ) external payable {
-        IErc1155(c).batchBuy{value: msg.value}(froms, tos, ids, amounts, tokenURIs, names, values);
+        IErc1155(c).batchBuy{value: msg.value}(orderIds,orderHashs,froms, tos, ids, amounts, tokenURIs, names, values);
     }
 
     function mintAndBuy1155(
         address c,
+        string memory orderId,
+        string memory orderHash,
         uint256 tokenId,
         address from,
         address to,
@@ -87,6 +93,8 @@ contract Robot {
         uint256 amount
     ) external payable {
         IErc1155(c).mintAndBuy{value: msg.value}(
+            orderId,
+            orderHash,
             tokenId,
             from,
             to,

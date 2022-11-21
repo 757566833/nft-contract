@@ -15,6 +15,8 @@ interface IErc1155 {
     ) external;
 
     function mintAndBuy(
+        string memory orderId,
+        string memory orderHash,
         uint256 tokenId,
         address from,
         address to,
@@ -23,6 +25,8 @@ interface IErc1155 {
         uint256 amount
     ) external payable;
      function batchBuy(
+        string[] memory orderIds,
+        string[] memory orderHashs,
         address[] memory froms,
         address[] memory tos,
         uint256[] memory ids,
@@ -33,6 +37,8 @@ interface IErc1155 {
     ) external payable;
     
     function buy(
+        string memory orderId,
+        string memory orderHash,
         uint256 tokenId,
         address from,
         address to,

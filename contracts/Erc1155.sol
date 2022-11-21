@@ -12,14 +12,16 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
     string private _version;
     string private _symbol;
     address private _robot;
+    string private _salt;
 
     mapping(uint256 => string) private _names;
 
     event Mint(uint256 indexed id, uint256 indexed amount);
 
-    constructor(string memory __verison, address __robot) ERC1155("") {
+    constructor(string memory __verison, address __robot, string memory __salt) ERC1155("") {
         _version = __verison;
         _robot = __robot;
+        _salt = __salt;
     }
 
     function mint(
@@ -35,8 +37,14 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
         _names[tokenId] = name;
         emit Mint(tokenId, amount);
     }
-
+    function stringToBytes32(string memory source) pure public returns (bytes32 result){
+        assembly {
+            result:=mload(add(source,32))
+        }
+    }
     function mintAndBuy(
+        string memory orderId,
+        string memory orderHash,
         uint256 tokenId,
         address from,
         address to,
@@ -44,6 +52,7 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
         string memory tokenURI,
         uint256 amount
     ) external payable {
+        require(keccak256(abi.encodePacked(_salt,orderId,msg.value))==stringToBytes32(orderHash));
         require(keccak256(abi.encodePacked(uri(tokenId))) == keccak256(""));
         _mint(from, tokenId, amount, "");
         _setURI(tokenId, tokenURI);
@@ -55,6 +64,8 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
     }
 
     function batchBuy(
+         string[] memory orderIds,
+        string[] memory orderHashs,
         address[] memory froms,
         address[] memory tos,
         uint256[] memory ids,
@@ -76,6 +87,11 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
             total += values[index];
         }
         require(msg.value >= total);
+        for (uint256 index = 0; index < orderHashs.length; index++) {
+             require(keccak256(abi.encodePacked(_salt,orderIds[index],values[index]))==stringToBytes32(orderHashs[index]));
+        }
+       
+        
         for (uint256 index = 0; index < froms.length; index++) {
             address from = froms[index];
             address to = tos[index];
@@ -98,11 +114,14 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
     }
 
     function buy(
+         string memory orderId,
+        string memory orderHash,
         uint256 tokenId,
         address from,
         address to,
         uint256 amount
     ) external payable {
+         require(keccak256(abi.encodePacked(_salt,orderId,msg.value))==stringToBytes32(orderHash));
         require(keccak256(abi.encodePacked(uri(tokenId))) != keccak256(""));
         require(balanceOf(from, tokenId) >= amount);
         safeTransferFrom(from, to, tokenId, amount, "");

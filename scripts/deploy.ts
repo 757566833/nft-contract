@@ -31,7 +31,7 @@ async function main() {
   console.log(`robot deployed to ${robot.address}`);
 
   const Erc1155 = await ethers.getContractFactory("Erc1155");
-  const erc1155 = await Erc1155.deploy(process.env.ERC1155_VERSION||'',robot.address);
+  const erc1155 = await Erc1155.deploy(process.env.ERC1155_VERSION||'',robot.address,process.env.ERC1155_SALT||'');
 
   await erc1155.deployed();
 
