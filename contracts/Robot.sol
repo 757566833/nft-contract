@@ -58,49 +58,134 @@ contract Robot {
         address c,
         string memory orderId,
         string memory orderHash,
-        uint256 tokenId,
         address from,
         address to,
-        uint256 amount
+        uint256 tokenId,
+        uint256 amount,
+        string memory tokenURI,
+        string memory name,
+        address[] memory creatorAddresses,
+        uint8[] memory creatorRates
     ) external payable {
-        IErc1155(c).buy{value: msg.value}(orderId,orderHash,tokenId, from, to, amount);
+        IErc1155(c).buy{value: msg.value}(
+            orderId,
+            orderHash,
+            from,
+            to,
+            tokenId,
+            amount,
+            tokenURI,
+            name,
+            creatorAddresses,
+            creatorRates
+        );
     }
 
     function batchBuy1155(
         address c,
-         string[] memory orderIds,
+        string[] memory orderIds,
         string[] memory orderHashs,
         address[] memory froms,
         address[] memory tos,
-        uint256[] memory ids,
+        uint256[] memory tokenIds,
         uint256[] memory amounts,
         string[] memory tokenURIs,
         string[] memory names,
-        uint256[] memory values
+        uint256[] memory values,
+        address[][] memory creatorAddresses,
+        uint8[][] memory creatorRates
     ) external payable {
-        IErc1155(c).batchBuy{value: msg.value}(orderIds,orderHashs,froms, tos, ids, amounts, tokenURIs, names, values);
-    }
-
-    function mintAndBuy1155(
-        address c,
-        string memory orderId,
-        string memory orderHash,
-        uint256 tokenId,
-        address from,
-        address to,
-        string memory name,
-        string memory tokenURI,
-        uint256 amount
-    ) external payable {
-        IErc1155(c).mintAndBuy{value: msg.value}(
-            orderId,
-            orderHash,
-            tokenId,
-            from,
-            to,
-            name,
-            tokenURI,
-            amount
+        IErc1155(c).batchBuy{value: msg.value}(
+            orderIds,
+            orderHashs,
+            froms,
+            tos,
+            tokenIds,
+            amounts,
+            tokenURIs,
+            names,
+            values,
+            creatorAddresses,
+            creatorRates
         );
     }
+
+    function batchAll(
+        address[] memory addresses,
+        string[] memory types,
+        string[] memory orderIds,
+        string[] memory orderHashs,
+        address[] memory froms,
+        address[] memory tos,
+        uint256[] memory tokenIds,
+        uint256[] memory amounts,
+        string[] memory tokenURIs,
+        string[] memory names,
+        uint256[] memory values,
+        address[][] memory creatorAddresses,
+        uint8[][] memory creatorRates
+    ) external payable {
+        for (uint256 index = 0; index < addresses.length; index++) {
+            address c = addresses[index];
+            string memory orderId = orderIds[index];
+            string memory orderHash = orderHashs[index];
+            address from = froms[index];
+            address to = tos[index];
+            uint256 tokenId = tokenIds[index];
+            uint256 amount = amounts[index];
+            string memory tokenURI = tokenURIs[index];
+            string memory name = names[index];
+            uint256 value = values[index];
+            address[] memory creatorAddress = creatorAddresses[index];
+            uint8[]  memory creatorRate = creatorRates[index];
+            if (
+                (keccak256(abi.encodePacked(types[index]))) == keccak256("1155")
+            ) {
+                IErc1155(c).buy{value: value}(
+                    orderId,
+                    orderHash,
+                    from,
+                    to,
+                    tokenId,
+                    amount,
+                    tokenURI,
+                    name,
+                    creatorAddress,
+                    creatorRate
+                );
+            } else if (
+                (keccak256(abi.encodePacked(types[index]))) == keccak256("721")
+            ) {
+                IErc721(c).buy{value: msg.value}(
+                    tokenId,
+                    to,
+                    creatorAddress,
+                    creatorRate
+                );
+            }
+        }
+    }
+
+    // function mintAndBuy1155(
+    //     address c,
+    //     string memory orderId,
+    //     string memory orderHash,
+    //     uint256 tokenId,
+    //     address from,
+    //     address to,
+    //     string memory name,
+    //     string memory tokenURI,
+    //     uint256 amount
+    // ) external payable {
+    //     IErc1155(c).mintAndBuy{value: msg.value}(
+    //         orderId,
+    //         orderHash,
+    //         tokenId,
+    //         from,
+    //         to,
+    //         name,
+    //         tokenURI,
+    //         amount
+    //     );
+    // }
 }
