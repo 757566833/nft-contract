@@ -86,14 +86,14 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
 
     function buy(
         uint256 tokenId,
-        address to,
-        address[] memory _creatorAddress,
-        uint8[] memory _creatorRate
+        address to
+        // address[] memory _creatorAddress,
+        // uint8[] memory _creatorRate
     ) public payable {
-         require(
-            _creatorAddress.length == _creatorRate.length,
-            "creator address length not equal to creator reate length"
-        );
+        //  require(
+        //     _creatorAddress.length == _creatorRate.length,
+        //     "creator address length not equal to creator reate length"
+        // );
         require(tokenList[tokenId] != 0, "Item not selling");
         require(msg.value == tokenList[tokenId], "Incorrect price");
         emit CancelSell(tokenId, 2);
@@ -101,13 +101,13 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
         delete tokenList[tokenId];
         safeTransferFrom(ownerOf(tokenId), to, tokenId);
         uint256 _value = msg.value;
-        for (uint256 index = 0; index < _creatorAddress.length; index++) {
-            address payable user = payable(_creatorAddress[index]);
-            uint256 currentValue = (_creatorRate[index] * msg.value) / 100;
-            user.transfer(currentValue);
-            _value = _value - currentValue;
-            emit Creator(user, _creatorRate[index]);
-        }
+        // for (uint256 index = 0; index < _creatorAddress.length; index++) {
+        //     address payable user = payable(_creatorAddress[index]);
+        //     uint256 currentValue = (_creatorRate[index] * msg.value) / 100;
+        //     user.transfer(currentValue);
+        //     _value = _value - currentValue;
+        //     emit Creator(user, _creatorRate[index]);
+        // }
         from.transfer(_value);
     }
 

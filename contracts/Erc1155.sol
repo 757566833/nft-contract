@@ -112,9 +112,9 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
         uint256[] memory amounts,
         string[] memory tokenURIs,
         string[] memory names,
-        uint256[] memory values,
-        address[][] memory creatorAddresses,
-        uint8[][] memory creatorRates
+        uint256[] memory values
+        // address[][] memory creatorAddresses,
+        // uint8[][] memory creatorRates
     ) external payable {
         require(
             (froms.length == tos.length) &&
@@ -146,8 +146,8 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
             string memory tokenURI = tokenURIs[index];
             string memory name = names[index];
             uint256 value = values[index];
-            address[] memory creatorAddress = creatorAddresses[index];
-            uint8[] memory creatorRate = creatorRates[index];
+            // address[] memory creatorAddress = creatorAddresses[index];
+            // uint8[] memory creatorRate = creatorRates[index];
             if (keccak256(abi.encodePacked(uri(tokenId))) == keccak256("")) {
                 _mint(from, tokenId, amount, "");
                 _setURI(tokenId, tokenURI);
@@ -159,13 +159,13 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
                 emit Mint(tokenId, amount - b);
             }
             uint256 _value = value;
-            for (uint256 i = 0; i < creatorAddress.length; i++) {
-                address payable user = payable(creatorAddress[i]);
-                uint256 currentValue = (creatorRate[i] * value) / 100;
-                user.transfer(currentValue);
-                _value = _value - currentValue;
-                emit Creator(user, creatorRate[i]);
-            }
+            // for (uint256 i = 0; i < creatorAddress.length; i++) {
+            //     address payable user = payable(creatorAddress[i]);
+            //     uint256 currentValue = (creatorRate[i] * value) / 100;
+            //     user.transfer(currentValue);
+            //     _value = _value - currentValue;
+            //     emit Creator(user, creatorRate[i]);
+            // }
             safeTransferFrom(from, to, tokenId, amount, "");
             address payable o = payable(from);
             o.transfer(_value);
@@ -180,9 +180,9 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
         uint256 tokenId,
         uint256 amount,
         string memory tokenURI,
-        string memory name,
-        address[] memory creatorAddresses,
-        uint8[] memory creatorRates
+        string memory name
+        // address[] memory creatorAddresses,
+        // uint8[] memory creatorRates
     ) external payable {
         require(
             keccak256(abi.encodePacked(_salt, orderId, uint2str(msg.value))) ==
@@ -201,13 +201,13 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
             emit Mint(tokenId, amount - b);
         }
         uint256 _value = msg.value;
-        for (uint256 i = 0; i < creatorAddresses.length; i++) {
-            address payable user = payable(creatorAddresses[i]);
-            uint256 currentValue = (creatorRates[i] * msg.value) / 100;
-            user.transfer(currentValue);
-            _value = _value - currentValue;
-            emit Creator(user, creatorRates[i]);
-        }
+        // for (uint256 i = 0; i < creatorAddresses.length; i++) {
+        //     address payable user = payable(creatorAddresses[i]);
+        //     uint256 currentValue = (creatorRates[i] * msg.value) / 100;
+        //     user.transfer(currentValue);
+        //     _value = _value - currentValue;
+        //     emit Creator(user, creatorRates[i]);
+        // }
         safeTransferFrom(from, to, tokenId, amount, "");
         address payable o = payable(from);
         o.transfer(_value);

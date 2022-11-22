@@ -26,20 +26,20 @@ contract Robot {
     function buy721(
         address c,
         address to,
-        uint256 tokenId,
-        address[] memory _creatorAddress,
-        uint8[] memory _creatorRate
+        uint256 tokenId
+        // address[] memory _creatorAddress,
+        // uint8[] memory _creatorRate
     ) external payable {
-        require(
-            _creatorAddress.length == _creatorRate.length,
-            "creator address length not equal to creator reate length"
-        );
+        // require(
+        //     _creatorAddress.length == _creatorRate.length,
+        //     "creator address length not equal to creator reate length"
+        // );
         emit Buy(c, tokenId, msg.value);
         IErc721(c).buy{value: msg.value}(
             tokenId,
-            to,
-            _creatorAddress,
-            _creatorRate
+            to
+            // _creatorAddress,
+            // _creatorRate
         );
     }
 
@@ -63,9 +63,9 @@ contract Robot {
         uint256 tokenId,
         uint256 amount,
         string memory tokenURI,
-        string memory name,
-        address[] memory creatorAddresses,
-        uint8[] memory creatorRates
+        string memory name
+        // address[] memory creatorAddresses,
+        // uint8[] memory creatorRates
     ) external payable {
         IErc1155(c).buy{value: msg.value}(
             orderId,
@@ -75,9 +75,9 @@ contract Robot {
             tokenId,
             amount,
             tokenURI,
-            name,
-            creatorAddresses,
-            creatorRates
+            name
+            // creatorAddresses,
+            // creatorRates
         );
     }
 
@@ -91,9 +91,9 @@ contract Robot {
         uint256[] memory amounts,
         string[] memory tokenURIs,
         string[] memory names,
-        uint256[] memory values,
-        address[][] memory creatorAddresses,
-        uint8[][] memory creatorRates
+        uint256[] memory values
+        // address[][] memory creatorAddresses,
+        // uint8[][] memory creatorRates
     ) external payable {
         IErc1155(c).batchBuy{value: msg.value}(
             orderIds,
@@ -104,9 +104,9 @@ contract Robot {
             amounts,
             tokenURIs,
             names,
-            values,
-            creatorAddresses,
-            creatorRates
+            values
+            // creatorAddresses,
+            // creatorRates
         );
     }
 
@@ -121,12 +121,13 @@ contract Robot {
         uint256[] memory amounts,
         string[] memory tokenURIs,
         string[] memory names,
-        uint256[] memory values,
-        address[][] memory creatorAddresses,
-        uint8[][] memory creatorRates
-    ) external payable {
+        uint256[] memory values
+        // address[][] memory creatorAddresses,
+        // uint8[][] memory creatorRates
+    ) public payable {
         for (uint256 index = 0; index < addresses.length; index++) {
             address c = addresses[index];
+            string memory _type = types[index];
             string memory orderId = orderIds[index];
             string memory orderHash = orderHashs[index];
             address from = froms[index];
@@ -136,10 +137,10 @@ contract Robot {
             string memory tokenURI = tokenURIs[index];
             string memory name = names[index];
             uint256 value = values[index];
-            address[] memory creatorAddress = creatorAddresses[index];
-            uint8[]  memory creatorRate = creatorRates[index];
+            // address[] memory creatorAddress = creatorAddresses[index];
+            // uint8[]  memory creatorRate = creatorRates[index];
             if (
-                (keccak256(abi.encodePacked(types[index]))) == keccak256("1155")
+                (keccak256(abi.encodePacked(_type))) == keccak256("1155")
             ) {
                 IErc1155(c).buy{value: value}(
                     orderId,
@@ -149,18 +150,19 @@ contract Robot {
                     tokenId,
                     amount,
                     tokenURI,
-                    name,
-                    creatorAddress,
-                    creatorRate
+                    name
+                    // creatorAddress,
+                    // creatorRate
                 );
             } else if (
-                (keccak256(abi.encodePacked(types[index]))) == keccak256("721")
+                (keccak256(abi.encodePacked(_type))) == keccak256("721")
             ) {
+                
                 IErc721(c).buy{value: msg.value}(
                     tokenId,
-                    to,
-                    creatorAddress,
-                    creatorRate
+                    to
+                    // creatorAddress,
+                    // creatorRate
                 );
             }
         }

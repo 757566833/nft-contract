@@ -33,9 +33,9 @@ interface IErc1155 {
         uint256[] memory amounts,
         string[] memory tokenURIs,
         string[] memory names,
-        uint256[] memory values,
-        address[][] memory creatorAddresses,
-        uint8[][] memory creatorRates
+        uint256[] memory values
+        // address[][] memory creatorAddresses,
+        // uint8[][] memory creatorRates
     ) external payable;
     
     function buy(
@@ -46,9 +46,9 @@ interface IErc1155 {
         uint256 tokenId,
         uint256 amount,
         string memory tokenURI,
-        string memory name,
-        address[] memory creatorAddresses,
-        uint8[] memory creatorRates
+        string memory name
+        // address[] memory creatorAddresses,
+        // uint8[] memory creatorRates
     ) external payable;
 
     function version() external view returns (string memory);

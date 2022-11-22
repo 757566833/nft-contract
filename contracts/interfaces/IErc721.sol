@@ -24,8 +24,8 @@ interface IErc721 {
 
     function buy(
         uint256 tokenId,
-        address to,
-        address[] memory _creatorAddress,
-        uint8[] memory _creatorRate
+        address to
+        // address[] memory _creatorAddress,
+        // uint8[] memory _creatorRate
     ) external payable;
 }
