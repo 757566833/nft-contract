@@ -28,4 +28,5 @@ interface IErc721 {
         // address[] memory _creatorAddress,
         // uint8[] memory _creatorRate
     ) external payable;
+    function ownerOfTokenId(uint256 tokenId) external view returns (address owner);
 }

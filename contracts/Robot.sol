@@ -11,14 +11,24 @@ contract Robot {
     string private __version;
     event Buy(
         address indexed contractAddress,
+        uint256 indexed cType,
         uint256 indexed tokenId,
-        uint256 indexed price
+        address from,
+        address to,
+        uint256 amount,
+        uint256 price
     );
 
-    constructor(
-        string memory _versoion
+    event Lock(
+        address indexed contractAddress,
+        string indexed name,
+        string indexed tokenURI,
+        address to,
+        uint256 tokenId,
+        uint256 amount
+    );
 
-    ) {
+    constructor(string memory _versoion) {
         __version = _versoion;
     }
 
@@ -26,7 +36,7 @@ contract Robot {
         return __version;
     }
 
-    function batchMint1155(
+    function batchLockt1155(
         address erc1155,
         address[] memory tos,
         uint256[] memory tokenIds,
@@ -41,6 +51,14 @@ contract Robot {
                 (tokenURIs.length == names.length)
         );
         for (uint256 index = 0; index < tos.length; index++) {
+            emit Lock(
+                erc1155,
+                names[index],
+                tokenURIs[index],
+                tos[index],
+                tokenIds[index],
+                amounts[index]
+            );
             IErc1155(erc1155).mint(
                 tos[index],
                 tokenIds[index],
@@ -53,7 +71,7 @@ contract Robot {
 
     function batchAll(
         address[] memory addresses,
-        string[] memory types,
+        uint256[] memory types,
         string[] memory orderIds,
         string[] memory orderHashs,
         address[] memory froms,
@@ -74,7 +92,8 @@ contract Robot {
                 (tokenIds.length == amounts.length) &&
                 (amounts.length == tokenURIs.length) &&
                 (tokenURIs.length == names.length) &&
-                (names.length == values.length)
+                (names.length == values.length),
+            "length not same"
         );
         uint256 _total = 0;
         for (uint256 index = 0; index < values.length; index++) {
@@ -82,36 +101,48 @@ contract Robot {
         }
         require(_total == msg.value, "value != sum values");
         for (uint256 index = 0; index < addresses.length; index++) {
-            if (
-                (keccak256(abi.encodePacked(types[index]))) ==
-                keccak256("1155")
-            ) {
-                {
-                    IErc1155(addresses[index]).buy{value: values[index]}(
-                        orderIds[index],
-                        orderHashs[index],
-                        froms[index],
-                        tos[index],
-                        tokenIds[index],
-                        amounts[index],
-                        tokenURIs[index],
-                        names[index]
-                        // creatorAddress,
-                        // creatorRate
-                    );
-                }
-            } else if (
-                (keccak256(abi.encodePacked(types[index]))) ==
-                keccak256("721")
-            ) {
-                {
-                    IErc721(addresses[index]).buy{value: msg.value}(
-                        tokenIds[index],
-                        tos[index]
-                        // creatorAddress,
-                        // creatorRate
-                    );
-                }
+            if (types[index] == 2) {
+                emit Buy(
+                    addresses[index],
+                    types[index],
+                    tokenIds[index],
+                    froms[index],
+                    tos[index],
+                    amounts[index],
+                    values[index]
+                );
+                IErc1155(addresses[index]).buy{value: values[index]}(
+                    orderIds[index],
+                    orderHashs[index],
+                    froms[index],
+                    tos[index],
+                    tokenIds[index],
+                    amounts[index],
+                    tokenURIs[index],
+                    names[index]
+                    // creatorAddress,
+                    // creatorRate
+                );
+            } else if (types[index] == 1) {
+                // function ownerOf(uint256 tokenId) external view returns (address owner);
+                address from = IErc721(addresses[index]).ownerOfTokenId(
+                    tokenIds[index]
+                );
+                emit Buy(
+                    addresses[index],
+                    types[index],
+                    tokenIds[index],
+                    from,
+                    tos[index],
+                    1,
+                    values[index]
+                );
+                IErc721(addresses[index]).buy{value: values[index]}(
+                    tokenIds[index],
+                    tos[index]
+                    // creatorAddress,
+                    // creatorRate
+                );
             }
         }
     }

@@ -147,4 +147,8 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
         require(tokenList[tokenId] == 0, "Item is selling");
         super.safeTransferFrom(from, to, tokenId, data);
     }
+
+    function ownerOfTokenId(uint256 tokenId) external view returns (address owner){
+        return super.ownerOf(tokenId);
+    }
 }

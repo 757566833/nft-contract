@@ -16,7 +16,6 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
 
     mapping(uint256 => string) private _names;
 
-    event Mint(uint256 indexed id, uint256 indexed amount);
     event Creator(address indexed account, uint8 indexed rate);
 
     constructor(
@@ -66,7 +65,6 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
         _mint(to, tokenId, amount, "");
         _setURI(tokenId, tokenURI);
         _names[tokenId] = name;
-        emit Mint(tokenId, amount);
     }
 
     function bytesToHex(bytes memory buffer)
@@ -113,14 +111,12 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
         );
 
         if (keccak256(abi.encodePacked(uri(tokenId))) == keccak256("")) {
-            _mint(from, tokenId, amount, "");
             _setURI(tokenId, tokenURI);
+            _mint(from, tokenId, amount, "");
             _names[tokenId] = name;
-            emit Mint(tokenId, amount);
         } else if (balanceOf(from, tokenId) < amount) {
             uint256 b = balanceOf(from, tokenId);
             _mint(from, tokenId, amount - b, "");
-            emit Mint(tokenId, amount - b);
         }
         uint256 _value = msg.value;
         // for (uint256 i = 0; i < creatorAddresses.length; i++) {
