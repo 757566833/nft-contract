@@ -9,9 +9,11 @@ contract Erc721Factory {
     using Counters for Counters.Counter;
     Counters.Counter private _count;
     string private __version;
+    address private __robot;
 
-    constructor(string memory _versoion) {
+    constructor(string memory _versoion,address _robot) {
         __version = _versoion;
+        __robot= _robot;
     }
 
     event Created(address indexed erc721);
@@ -32,7 +34,7 @@ contract Erc721Factory {
         assembly {
             erc721 := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        IErc721(erc721).initialize(_name, _symbol, __version);
+        IErc721(erc721).initialize(_name, _symbol, __version,__robot);
         IErc721(erc721).transferContractOwnership(msg.sender);
         emit Created(erc721);
     }

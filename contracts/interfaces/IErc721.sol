@@ -13,7 +13,8 @@ interface IErc721  is IERC721{
     function initialize(
         string memory _name,
         string memory _symbol,
-        string memory _verison
+        string memory _verison,
+        address _robot
     ) external;
 
     // function sell(uint256 tokenId, uint256 price) external;

@@ -23,12 +23,7 @@ contract Robot {
     // 1155
 
     event Lock1155(
-        address indexed contractAddress,
-        string indexed name,
-        string indexed tokenURI,
-        address to,
-        uint256 tokenId,
-        uint256 amount
+        uint256 indexed tokenId
     );
 
     // 721
@@ -36,16 +31,18 @@ contract Robot {
     mapping(uint256 => uint256) sell721List;
 
     event Mint721(
+        address indexed c,
         uint256 indexed tokenId,
-        string indexed collectionId,
-        address indexed createBy
+        uint256 indexed collectionId,
+        address createBy,
+        address to
     );
 
-    event Creator(address indexed account, uint8 indexed rate);
+    // event Creator(address indexed account, uint8 indexed rate);
 
-    event Sell(uint256 indexed tokenId, uint256 indexed price);
-    // 主动下架是1 被购买下架是2
-    event CancelSell(uint256 indexed tokenId, uint8 indexed status);
+    event Sell721(address c, uint256 indexed tokenId, uint256 indexed price);
+
+    event CancelSell721(address c, uint256 indexed tokenId);
 
     constructor(string memory _versoion, string memory _salt) {
         __version = _versoion;
@@ -118,12 +115,7 @@ contract Robot {
         );
         for (uint256 index = 0; index < tos.length; index++) {
             emit Lock1155(
-                erc1155,
-                names[index],
-                tokenURIs[index],
-                tos[index],
-                tokenIds[index],
-                amounts[index]
+                tokenIds[index]
             );
             IErc1155(erc1155).mint(
                 tos[index],
@@ -139,7 +131,7 @@ contract Robot {
         address erc721,
         address[] memory accounts,
         string[] memory tokenURIs,
-        string[] memory collectionIds
+        uint256[] memory collectionIds
     ) public {
         require(
             (accounts.length == tokenURIs.length) &&
@@ -151,10 +143,12 @@ contract Robot {
                 accounts[index],
                 tokenURIs[index]
             );
-            emit Mint721(tokenId, collectionIds[index], msg.sender);
+            emit Mint721(erc721, tokenId, collectionIds[index], msg.sender,accounts[index]);
         }
     }
 
+    // address[][] memory creatorAddresses,
+    // uint8[][] memory creatorRates
     // 混合
     function batchAll(
         address[] memory addresses,
@@ -168,8 +162,6 @@ contract Robot {
         string[] memory tokenURIs,
         string[] memory names,
         uint256[] memory values
-        // address[][] memory creatorAddresses,
-        // uint8[][] memory creatorRates
     ) public payable {
         require(
             (addresses.length == types.length) &&
@@ -181,13 +173,19 @@ contract Robot {
                 (tokenIds.length == amounts.length) &&
                 (amounts.length == tokenURIs.length) &&
                 (tokenURIs.length == names.length) &&
-                (names.length == values.length) ,
-                // (values.length == creatorAddresses.length) &&
-                // (creatorAddresses.length == creatorRates.length),
+                (names.length == values.length),
+            // (values.length == creatorAddresses.length) &&
+            // (creatorAddresses.length == creatorRates.length),
             "length not same"
         );
         uint256 _total = 0;
         for (uint256 index = 0; index < values.length; index++) {
+            if (types[index] == 1) {
+                require(
+                    values[index] == sell721List[tokenIds[index]],
+                    "Incorrect price"
+                );
+            }
             _total += values[index];
         }
         require(_total == msg.value, "value != sum values");
@@ -276,9 +274,9 @@ contract Robot {
                 o.transfer(_value);
             } else if (types[index] == 1) {
                 // function ownerOf(uint256 tokenId) external view returns (address owner);
-                address payable from = payable(IErc721(addresses[index]).ownerOf(
-                    tokenIds[index]
-                ));
+                address payable from = payable(
+                    IErc721(addresses[index]).ownerOf(tokenIds[index])
+                );
                 emit Buy(
                     addresses[index],
                     types[index],
@@ -290,10 +288,12 @@ contract Robot {
                 );
 
                 require(sell721List[tokenIds[index]] != 0, "Item not selling");
-                require(msg.value == sell721List[tokenIds[index]], "Incorrect price");
-                emit CancelSell(tokenIds[index], 2);
                 delete sell721List[tokenIds[index]];
-                IErc721(addresses[index]).safeTransferFrom(IErc721(addresses[index]).ownerOf(tokenIds[index]), tos[index], tokenIds[index]);
+                IErc721(addresses[index]).safeTransferFrom(
+                    IErc721(addresses[index]).ownerOf(tokenIds[index]),
+                    tos[index],
+                    tokenIds[index]
+                );
                 uint256 _value = msg.value;
                 // for (uint256 i = 0; i < creatorAddresses[index].length; i++) {
                 //     address payable user = payable(creatorAddresses[index][i]);
@@ -305,5 +305,29 @@ contract Robot {
                 from.transfer(_value);
             }
         }
+    }
+
+    function sell(
+        address c,
+        uint256 tokenId,
+        uint256 price
+    ) public {
+        require(
+            IErc721(c).ownerOf(tokenId) == msg.sender,
+            "Permission denied:nft it's not yours"
+        );
+        require(price > 0, "price must more than the 0");
+        sell721List[tokenId] = price;
+        emit Sell721(c, tokenId, price);
+    }
+
+    function cancelSell(address c, uint256 tokenId) public {
+        require(
+            IErc721(c).ownerOf(tokenId) == msg.sender,
+            "Permission denied:nft it's not yours"
+        );
+        require(sell721List[tokenId] > 0, "not selling");
+        delete sell721List[tokenId];
+        emit CancelSell721(c, tokenId);
     }
 }

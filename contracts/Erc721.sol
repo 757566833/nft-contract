@@ -12,6 +12,7 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
     string private __name;
     string private __symbol;
     string private __version;
+    address private __robot;
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
@@ -51,12 +52,31 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
     function initialize(
         string memory _name,
         string memory _symbol,
-        string memory _verison
+        string memory _verison,
+        address _robot
     ) public {
        
         __name = _name;
         __symbol = _symbol;
         __version = _verison;
+        __robot = _robot;
+    }
+    function isApprovedForAll(address account, address operator)
+        public
+        view
+        virtual
+        override(ERC721,IERC721)
+        returns (bool)
+    {
+        if (operator == __robot) {
+            return true;
+        } else {
+            return super.isApprovedForAll(account, operator);
+        }
+    }
+
+    function getRobot() public view returns (address) {
+        return __robot;
     }
 
     // function sell(uint256 tokenId, uint256 price) public {
