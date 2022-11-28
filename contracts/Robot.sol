@@ -139,11 +139,13 @@ contract Robot {
             "length not same"
         );
         for (uint256 index = 0; index < accounts.length; index++) {
-            uint256 tokenId = IErc721(erc721).mint(
+            uint256 nextId = IErc721(erc721).currentId()+1;
+             emit Mint721(erc721, nextId, collectionIds[index], msg.sender,accounts[index]);
+            IErc721(erc721).mint(
                 accounts[index],
                 tokenURIs[index]
             );
-            emit Mint721(erc721, tokenId, collectionIds[index], msg.sender,accounts[index]);
+           
         }
     }
 

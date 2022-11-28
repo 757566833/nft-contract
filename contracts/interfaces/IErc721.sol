@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 interface IErc721  is IERC721{
     function transferContractOwnership(address newOwner) external;
 
-    function mint(address account, string memory tokenURI) external returns (uint256);
+    function mint(address account, string memory tokenURI) external;
 
     function initialize(
         string memory _name,
@@ -16,6 +16,7 @@ interface IErc721  is IERC721{
         string memory _verison,
         address _robot
     ) external;
+     function currentId () external  view returns (uint256);
 
     // function sell(uint256 tokenId, uint256 price) external;
 

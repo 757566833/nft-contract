@@ -24,17 +24,17 @@ contract Erc721 is ERC721URIStorage, IErc721, Ownable {
         super.transferOwnership(newOwner);
     }
     
+    function currentId () external  view returns (uint256){
+        return _tokenIds.current();
+    }
 
     function mint(address account, string memory tokenURI)
-        public returns (uint256)
+        public 
     {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         _mint(account, newItemId);
         _setTokenURI(newItemId, tokenURI);
-        // // event Mint(uint256 indexed tokenId,string indexed collectionId);
-        // emit Mint(newItemId, collectionId,createBy);
-        return newItemId;
     }
 
     function name() public view virtual override returns (string memory) {
