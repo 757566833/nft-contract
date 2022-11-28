@@ -5,12 +5,10 @@ pragma solidity =0.8.17;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-interface IErc721 {
+interface IErc721  is IERC721{
     function transferContractOwnership(address newOwner) external;
 
-    function mint(address account, string memory tokenURI)
-        external
-        returns (uint256);
+    function mint(address account, string memory tokenURI) external returns (uint256);
 
     function initialize(
         string memory _name,
@@ -18,15 +16,15 @@ interface IErc721 {
         string memory _verison
     ) external;
 
-    function sell(uint256 tokenId, uint256 price) external;
+    // function sell(uint256 tokenId, uint256 price) external;
 
-    function cancelSell(uint256 tokenId) external;
+    // function cancelSell(uint256 tokenId) external;
 
-    function buy(
-        uint256 tokenId,
-        address to
-        // address[] memory _creatorAddress,
-        // uint8[] memory _creatorRate
-    ) external payable;
-    function ownerOfTokenId(uint256 tokenId) external view returns (address owner);
+    // function buy(
+    //     uint256 tokenId,
+    //     address to
+    //     // address[] memory _creatorAddress,
+    //     // uint8[] memory _creatorRate
+    // ) external payable;
+    // function ownerOfTokenId(uint256 tokenId) external view returns (address owner);
 }
