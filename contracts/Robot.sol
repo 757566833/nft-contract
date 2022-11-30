@@ -22,8 +22,10 @@ contract Robot {
 
     // 1155
 
-    event Lock1155(
-        uint256 indexed tokenId
+    event Mint1155(
+        uint256 indexed tokenId,
+        uint256 indexed amount,
+        address indexed owner
     );
 
     // 721
@@ -40,9 +42,13 @@ contract Robot {
 
     // event Creator(address indexed account, uint8 indexed rate);
 
-    event Sell721(address c, uint256 indexed tokenId, uint256 indexed price);
+    event Sell721(
+        address indexed c,
+        uint256 indexed tokenId,
+        uint256 indexed price
+    );
 
-    event CancelSell721(address c, uint256 indexed tokenId);
+    event CancelSell721(address indexed c, uint256 indexed tokenId);
 
     constructor(string memory _versoion, string memory _salt) {
         __version = _versoion;
@@ -114,9 +120,7 @@ contract Robot {
             "length not same"
         );
         for (uint256 index = 0; index < tos.length; index++) {
-            emit Lock1155(
-                tokenIds[index]
-            );
+            emit Mint1155(tokenIds[index], amounts[index], tos[index]);
             IErc1155(erc1155).mint(
                 tos[index],
                 tokenIds[index],
@@ -139,13 +143,15 @@ contract Robot {
             "length not same"
         );
         for (uint256 index = 0; index < accounts.length; index++) {
-            uint256 nextId = IErc721(erc721).currentId()+1;
-             emit Mint721(erc721, nextId, collectionIds[index], msg.sender,accounts[index]);
-            IErc721(erc721).mint(
-                accounts[index],
-                tokenURIs[index]
+            uint256 nextId = IErc721(erc721).currentId() + 1;
+            emit Mint721(
+                erc721,
+                nextId,
+                collectionIds[index],
+                msg.sender,
+                accounts[index]
             );
-           
+            IErc721(erc721).mint(accounts[index], tokenURIs[index]);
         }
     }
 
@@ -198,15 +204,6 @@ contract Robot {
             //         "hash is error"
             //     );
             if (types[index] == 2) {
-                emit Buy(
-                    addresses[index],
-                    types[index],
-                    tokenIds[index],
-                    froms[index],
-                    tos[index],
-                    amounts[index],
-                    values[index]
-                );
                 string memory s = bytesToHex(
                     bytes.concat(
                         keccak256(
@@ -231,8 +228,13 @@ contract Robot {
                         )
                     ) == keccak256("")
                 ) {
+                    emit Mint1155(
+                        tokenIds[index],
+                        amounts[index],
+                        froms[index]
+                    );
                     IErc1155(addresses[index]).mint(
-                        tos[index],
+                        froms[index],
                         tokenIds[index],
                         names[index],
                         tokenURIs[index],
@@ -248,8 +250,13 @@ contract Robot {
                         froms[index],
                         tokenIds[index]
                     );
+                    emit Mint1155(
+                        tokenIds[index],
+                        amounts[index] - b,
+                        froms[index]
+                    );
                     IErc1155(addresses[index]).mint(
-                        tos[index],
+                        froms[index],
                         tokenIds[index],
                         names[index],
                         tokenURIs[index],
@@ -306,6 +313,15 @@ contract Robot {
                 // }
                 from.transfer(_value);
             }
+            emit Buy(
+                addresses[index],
+                types[index],
+                tokenIds[index],
+                froms[index],
+                tos[index],
+                amounts[index],
+                values[index]
+            );
         }
     }
 
@@ -321,6 +337,26 @@ contract Robot {
         require(price > 0, "price must more than the 0");
         sell721List[tokenId] = price;
         emit Sell721(c, tokenId, price);
+    }
+
+    function batchSell(
+        address[] memory c,
+        uint256[] memory tokenIds,
+        uint256[] memory prices
+    ) public {
+        require(
+            c.length == tokenIds.length && tokenIds.length == prices.length,
+            "length not same"
+        );
+        for (uint256 index = 0; index < c.length; index++) {
+            require(
+                IErc721(c[index]).ownerOf(tokenIds[index]) == msg.sender,
+                "Permission denied:nft it's not yours"
+            );
+            require(prices[index] > 0, "price must more than the 0");
+            sell721List[tokenIds[index]] = prices[index];
+            emit Sell721(c[index], tokenIds[index], prices[index]);
+        }
     }
 
     function cancelSell(address c, uint256 tokenId) public {
