@@ -210,7 +210,7 @@ contract Robot {
                             abi.encodePacked(
                                 __salt,
                                 orderIds[index],
-                                uint2str(msg.value)
+                                uint2str(values[index])
                             )
                         )
                     )
@@ -263,7 +263,16 @@ contract Robot {
                         amounts[index] - b
                     );
                 }
-                uint256 _value = msg.value;
+                emit Buy(
+                    addresses[index],
+                    types[index],
+                    tokenIds[index],
+                    froms[index],
+                    tos[index],
+                    amounts[index],
+                    values[index]
+                );
+                uint256 _value = values[index];
                 // for (uint256 i = 0; i < creatorAddresses[i].length; i++) {
                 //     address payable user = payable(creatorAddresses[index][i]);
                 //     uint256 currentValue = (creatorRates[index][i] *
@@ -303,7 +312,7 @@ contract Robot {
                     tos[index],
                     tokenIds[index]
                 );
-                uint256 _value = msg.value;
+                uint256 _value = values[index];
                 // for (uint256 i = 0; i < creatorAddresses[index].length; i++) {
                 //     address payable user = payable(creatorAddresses[index][i]);
                 //     uint256 currentValue = (creatorRates[index][i] * msg.value) / 100;
@@ -313,15 +322,6 @@ contract Robot {
                 // }
                 from.transfer(_value);
             }
-            emit Buy(
-                addresses[index],
-                types[index],
-                tokenIds[index],
-                froms[index],
-                tos[index],
-                amounts[index],
-                values[index]
-            );
         }
     }
 
