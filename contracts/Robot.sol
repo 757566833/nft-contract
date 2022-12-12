@@ -104,13 +104,15 @@ contract Robot {
     }
 
     // 1155
-    function batchLockt1155(
+    function batchLock1155(
         address erc1155,
         address[] memory tos,
         uint256[] memory tokenIds,
         string[] memory names,
         string[] memory tokenURIs,
-        uint256[] memory amounts
+        uint256[] memory amounts,
+        uint256[] memory supplies,
+        string[] memory suppliesHash
     ) external payable {
         require(
             (tos.length == tokenIds.length) &&
@@ -120,6 +122,27 @@ contract Robot {
             "length not same"
         );
         for (uint256 index = 0; index < tos.length; index++) {
+            require(
+                IErc1155(erc1155).balanceOf(tos[index], tokenIds[index]) +
+                    amounts[index] <=
+                    supplies[index]
+            );
+            string memory s = bytesToHex(
+                bytes.concat(
+                    keccak256(
+                        abi.encodePacked(
+                            __salt,
+                            uint2str(tokenIds[index]),
+                            uint2str(supplies[index])
+                        )
+                    )
+                )
+            );
+            require(
+                keccak256(abi.encodePacked(s)) ==
+                    keccak256(abi.encodePacked(suppliesHash[index])),
+                "supply hash is error"
+            );
             emit Mint1155(tokenIds[index], amounts[index], tos[index]);
             IErc1155(erc1155).mint(
                 tos[index],
@@ -162,21 +185,23 @@ contract Robot {
         address[] memory addresses,
         uint256[] memory types,
         string[] memory orderIds,
-        string[] memory orderHashs,
-        address[] memory froms,
+        string[] memory ordersHash,
+        address[] memory fromAddresses,
         address[] memory tos,
         uint256[] memory tokenIds,
         uint256[] memory amounts,
         string[] memory tokenURIs,
         string[] memory names,
-        uint256[] memory values
+        uint256[] memory values,
+        uint256[] memory supplies,
+        string[] memory suppliesHash
     ) public payable {
         require(
             (addresses.length == types.length) &&
                 (types.length == orderIds.length) &&
-                (orderIds.length == orderHashs.length) &&
-                (orderHashs.length == froms.length) &&
-                (froms.length == tos.length) &&
+                (orderIds.length == ordersHash.length) &&
+                (ordersHash.length == fromAddresses.length) &&
+                (fromAddresses.length == tos.length) &&
                 (tos.length == tokenIds.length) &&
                 (tokenIds.length == amounts.length) &&
                 (amounts.length == tokenURIs.length) &&
@@ -204,21 +229,23 @@ contract Robot {
             //         "hash is error"
             //     );
             if (types[index] == 2) {
-                string memory s = bytesToHex(
-                    bytes.concat(
-                        keccak256(
-                            abi.encodePacked(
-                                __salt,
-                                orderIds[index],
-                                uint2str(values[index])
+                require(
+                    keccak256(
+                        abi.encodePacked(
+                            bytesToHex(
+                                bytes.concat(
+                                    keccak256(
+                                        abi.encodePacked(
+                                            __salt,
+                                            orderIds[index],
+                                            uint2str(values[index])
+                                        )
+                                    )
+                                )
                             )
                         )
-                    )
-                );
-                require(
-                    keccak256(abi.encodePacked(s)) ==
-                        keccak256(abi.encodePacked(orderHashs[index])),
-                    "hash is error"
+                    ) == keccak256(abi.encodePacked(ordersHash[index])),
+                    "value hash is error"
                 );
 
                 if (
@@ -231,10 +258,34 @@ contract Robot {
                     emit Mint1155(
                         tokenIds[index],
                         amounts[index],
-                        froms[index]
+                        fromAddresses[index]
+                    );
+                    require(
+                        IErc1155(addresses[index]).balanceOf(
+                            fromAddresses[index],
+                            tokenIds[index]
+                        ) +
+                            amounts[index] <=
+                            supplies[index]
+                    );
+                    string memory s = bytesToHex(
+                        bytes.concat(
+                            keccak256(
+                                abi.encodePacked(
+                                    __salt,
+                                    uint2str(tokenIds[index]),
+                                    uint2str(supplies[index])
+                                )
+                            )
+                        )
+                    );
+                    require(
+                        keccak256(abi.encodePacked(s)) ==
+                            keccak256(abi.encodePacked(suppliesHash[index])),
+                        "supply value is error"
                     );
                     IErc1155(addresses[index]).mint(
-                        froms[index],
+                        fromAddresses[index],
                         tokenIds[index],
                         names[index],
                         tokenURIs[index],
@@ -242,32 +293,60 @@ contract Robot {
                     );
                 } else if (
                     IErc1155(addresses[index]).balanceOf(
-                        froms[index],
+                        fromAddresses[index],
                         tokenIds[index]
                     ) < amounts[index]
                 ) {
-                    uint256 b = IErc1155(addresses[index]).balanceOf(
-                        froms[index],
-                        tokenIds[index]
-                    );
                     emit Mint1155(
                         tokenIds[index],
-                        amounts[index] - b,
-                        froms[index]
+                        amounts[index] -
+                            IErc1155(addresses[index]).balanceOf(
+                                fromAddresses[index],
+                                tokenIds[index]
+                            ),
+                        fromAddresses[index]
+                    );
+                    require(
+                        IErc1155(addresses[index]).balanceOf(
+                            fromAddresses[index],
+                            tokenIds[index]
+                        ) +
+                            amounts[index] <=
+                            supplies[index]
+                    );
+                    string memory s = bytesToHex(
+                        bytes.concat(
+                            keccak256(
+                                abi.encodePacked(
+                                    __salt,
+                                    uint2str(tokenIds[index]),
+                                    uint2str(supplies[index])
+                                )
+                            )
+                        )
+                    );
+                    require(
+                        keccak256(abi.encodePacked(s)) ==
+                            keccak256(abi.encodePacked(suppliesHash[index])),
+                        "supply value is error"
                     );
                     IErc1155(addresses[index]).mint(
-                        froms[index],
+                        fromAddresses[index],
                         tokenIds[index],
                         names[index],
                         tokenURIs[index],
-                        amounts[index] - b
+                        amounts[index] -
+                            IErc1155(addresses[index]).balanceOf(
+                                fromAddresses[index],
+                                tokenIds[index]
+                            )
                     );
                 }
                 emit Buy(
                     addresses[index],
                     types[index],
                     tokenIds[index],
-                    froms[index],
+                    fromAddresses[index],
                     tos[index],
                     amounts[index],
                     values[index]
@@ -282,13 +361,13 @@ contract Robot {
                 //     emit Creator(user, creatorRates[index][i]);
                 // }
                 IErc1155(addresses[index]).safeTransferFrom(
-                    froms[index],
+                    fromAddresses[index],
                     tos[index],
                     tokenIds[index],
                     amounts[index],
                     ""
                 );
-                address payable o = payable(froms[index]);
+                address payable o = payable(fromAddresses[index]);
                 o.transfer(_value);
             } else if (types[index] == 1) {
                 // function ownerOf(uint256 tokenId) external view returns (address owner);
