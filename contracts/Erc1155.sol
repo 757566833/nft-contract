@@ -10,7 +10,6 @@ import "./interfaces/IErc1155.sol";
 
 contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
     string private _version;
-    string private _symbol;
     address private _robot;
 
 
@@ -27,7 +26,6 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
         _robot = __robot;
        
     }
-
     function mint(
         address to,
         uint256 tokenId,

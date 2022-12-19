@@ -30,8 +30,6 @@ contract Robot {
 
     // 721
 
-    mapping(uint256 => uint256) sell721List;
-
     event Mint721(
         address indexed c,
         uint256 indexed tokenId,
@@ -39,16 +37,6 @@ contract Robot {
         address createBy,
         address to
     );
-
-    // event Creator(address indexed account, uint8 indexed rate);
-
-    event Sell721(
-        address indexed c,
-        uint256 indexed tokenId,
-        uint256 indexed price
-    );
-
-    event CancelSell721(address indexed c, uint256 indexed tokenId);
 
     constructor(string memory _versoion, string memory _salt) {
         __version = _versoion;
@@ -213,12 +201,6 @@ contract Robot {
         );
         uint256 _total = 0;
         for (uint256 index = 0; index < values.length; index++) {
-            if (types[index] == 1) {
-                require(
-                    values[index] == sell721List[tokenIds[index]],
-                    "Incorrect price"
-                );
-            }
             _total += values[index];
         }
         require(_total == msg.value, "value != sum values");
@@ -383,9 +365,6 @@ contract Robot {
                     1,
                     values[index]
                 );
-
-                require(sell721List[tokenIds[index]] != 0, "Item not selling");
-                delete sell721List[tokenIds[index]];
                 IErc721(addresses[index]).safeTransferFrom(
                     IErc721(addresses[index]).ownerOf(tokenIds[index]),
                     tos[index],
@@ -402,49 +381,5 @@ contract Robot {
                 from.transfer(_value);
             }
         }
-    }
-
-    function sell(
-        address c,
-        uint256 tokenId,
-        uint256 price
-    ) public {
-        require(
-            IErc721(c).ownerOf(tokenId) == msg.sender,
-            "Permission denied:nft it's not yours"
-        );
-        require(price > 0, "price must more than the 0");
-        sell721List[tokenId] = price;
-        emit Sell721(c, tokenId, price);
-    }
-
-    function batchSell(
-        address[] memory c,
-        uint256[] memory tokenIds,
-        uint256[] memory prices
-    ) public {
-        require(
-            c.length == tokenIds.length && tokenIds.length == prices.length,
-            "length not same"
-        );
-        for (uint256 index = 0; index < c.length; index++) {
-            require(
-                IErc721(c[index]).ownerOf(tokenIds[index]) == msg.sender,
-                "Permission denied:nft it's not yours"
-            );
-            require(prices[index] > 0, "price must more than the 0");
-            sell721List[tokenIds[index]] = prices[index];
-            emit Sell721(c[index], tokenIds[index], prices[index]);
-        }
-    }
-
-    function cancelSell(address c, uint256 tokenId) public {
-        require(
-            IErc721(c).ownerOf(tokenId) == msg.sender,
-            "Permission denied:nft it's not yours"
-        );
-        require(sell721List[tokenId] > 0, "not selling");
-        delete sell721List[tokenId];
-        emit CancelSell721(c, tokenId);
     }
 }
