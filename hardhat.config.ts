@@ -31,7 +31,25 @@ const config: HardhatUserConfig = {
       accounts: ['0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'],
       gas: 'auto',
       gasPrice: 'auto'
-    }
+    },
+    arbitrumGoerli:{
+      url: "https://arb-goerli.g.alchemy.com/v2/kxvi6SHAw1RR1Mn4PFuDb1EJhV5nHU07",
+      accounts: ['59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'],
+      gas: 'auto',
+      gasPrice: 'auto'
+    },
+    optimismGoerli:{
+      url: "https://goerli.optimism.io",
+      accounts: ['0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'],
+      gas: 'auto',
+      gasPrice: 'auto'
+    },
+    arbitrumOne:{
+      url: "https://arb1.arbitrum.io/rpc",
+      accounts: ['0ab5a3e7d8466e0bce128889984011bc1df639df30039da5cc78824a4c302e33'],
+      gas: 'auto',
+      gasPrice: 'auto'
+    },
   }
 };
 

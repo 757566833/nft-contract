@@ -20,6 +20,8 @@ async function main() {
 
   await robot.deployed();
 
+
+  console.log(`robot deployed hash ${  robot.deployTransaction.hash}`);
   console.log(`robot deployed to ${robot.address}`);
 
   const Erc721Factory = await ethers.getContractFactory("Erc721Factory");
@@ -27,6 +29,7 @@ async function main() {
 
   await erc721Factory.deployed();
 
+  
   console.log(`erc721Factory deployed to ${erc721Factory.address}`);
 
 
