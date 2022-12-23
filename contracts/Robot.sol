@@ -113,7 +113,8 @@ contract Robot {
             require(
                 IErc1155(erc1155).balanceOf(tos[index], tokenIds[index]) +
                     amounts[index] <=
-                    supplies[index]
+                    supplies[index],
+                      "balance add amount greater than supply, balance maybe 0"
             );
             string memory s = bytesToHex(
                 bytes.concat(
@@ -230,6 +231,7 @@ contract Robot {
                     "value hash is error"
                 );
 
+                // if token is not created
                 if (
                     keccak256(
                         abi.encodePacked(
@@ -248,7 +250,8 @@ contract Robot {
                             tokenIds[index]
                         ) +
                             amounts[index] <=
-                            supplies[index]
+                            supplies[index],
+                        "balance add amount greater than supply, balance maybe 0"
                     );
                     string memory s = bytesToHex(
                         bytes.concat(
@@ -295,7 +298,7 @@ contract Robot {
                         ) +
                             amounts[index] <=
                             supplies[index]
-                    );
+                    ,"balance add amount greater than supply");
                     string memory s = bytesToHex(
                         bytes.concat(
                             keccak256(

@@ -33,7 +33,6 @@ contract Erc1155 is ERC1155URIStorage, IErc1155, Ownable {
         string memory tokenURI,
         uint256 amount
     ) external {
-        require(keccak256(abi.encodePacked(uri(tokenId))) == keccak256(""));
         _mint(to, tokenId, amount, "");
         _setURI(tokenId, tokenURI);
         _names[tokenId] = name;
